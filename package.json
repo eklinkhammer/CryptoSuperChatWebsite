@@ -1,5 +1,49 @@
 {
   "dependencies": {
-    "http-server": "^14.1.1"
+    "express": "^4.21.2",
+    "http-server": "^14.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "type": "module",
+  "name": "cryptosuperchatwebsite",
+  "version": "1.0.0",
+  "description": "Two static page templates - one for streaming overlay and one for donations.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts",
+    "build": "tsc && npm run lint",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eklinkhammer/CryptoSuperChatWebsite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eklinkhammer/CryptoSuperChatWebsite/issues"
+  },
+  "homepage": "https://github.com/eklinkhammer/CryptoSuperChatWebsite#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.6",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^15.14.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
   }
 }
