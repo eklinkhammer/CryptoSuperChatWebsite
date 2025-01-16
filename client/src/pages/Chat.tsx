@@ -3,26 +3,49 @@ import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
 import styles from "./Chat.module.css";
 import btc from "../assets/btcpay-logo.svg";
+import Dropdown from "./Dropdown";
+
 interface ChatLog {
 	name: string;
 	message: string;
 	amount: string;
+	streamer: string;
 	paymentMethod: string;
+}
+
+enum PaymentMethod {
+	CREDIT = "Credit Card",
+	BTCPAY = "BTCPay Server"
 }
 
 const Chat = ({ initialChatLogs = [] }) => {
 	const { streamerId } = useParams();
+	if (!streamerId) {
+		throw new Error("The streamerId parameter is missing");
+	}
+
+	const streamers = [streamerId, ...window.__INITIAL_DATA__];
+
+	const defaultDropdownValue = streamerId;
+	const [dropdownValue, setDropdownValue] = useState<string>(defaultDropdownValue);
 
 	const [formData, setFormData] = useState<ChatLog>({
 		name: "",
 		message: "",
 		amount: "",
 		paymentMethod: "Credit Card", // Default payment method
+		streamer: dropdownValue,
 	});
 
 	const [chatLogs, setChatLogs] = useState<ChatLog[]>(initialChatLogs || []);
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 
+	// Streamer Selection from Dropdown
+	const handleDropdownChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		setDropdownValue(event.target.value);
+	};
+
+	// Text change
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
 		const { name, value } = e.target;
 		setFormData({
@@ -51,7 +74,9 @@ const Chat = ({ initialChatLogs = [] }) => {
 		return errors;
 	};
 
-	const handlePayment = () => {
+	// Selection of payment (basically the submit)
+	const handlePayment = (paymentMethod: string) => {
+
 		const validationErrors = validateInputs();
 		if (Object.keys(validationErrors).length > 0) {
 			setErrors(validationErrors);
@@ -59,12 +84,13 @@ const Chat = ({ initialChatLogs = [] }) => {
 		}
 
 		// Handle payment actions based on the selected payment method
-		if (formData.paymentMethod === "Credit Card") {
+		if (paymentMethod === PaymentMethod.CREDIT) {
 			alert("Processing payment via Credit Card...");
-		} else if (formData.paymentMethod === "BTCPayServer") {
+		} else if (paymentMethod === PaymentMethod.BTCPAY) {
 			alert("Processing payment via BTCPayServer...");
 		}
-
+		formData.paymentMethod = paymentMethod;
+		formData.streamer = dropdownValue;
 		// Add the new message to the chat logs
 		setChatLogs([...chatLogs, formData]);
 
@@ -74,7 +100,9 @@ const Chat = ({ initialChatLogs = [] }) => {
 			message: "",
 			amount: "",
 			paymentMethod: "Credit Card", // Reset to default payment method
+			streamer: streamerId,
 		});
+		setDropdownValue(streamerId);
 	};
 
 	return (
@@ -109,6 +137,14 @@ const Chat = ({ initialChatLogs = [] }) => {
 		{errors.message && <p className={styles.error}>{errors.message}</p>}
 		</div>
 
+		<Dropdown
+			options={streamers}
+			value={dropdownValue}
+			onChange={handleDropdownChange}
+			label="Choose a streamer:"
+			id="dropdown"
+		/>
+
 		<div className={styles.formGroup}>
 		<label htmlFor="amount" className={styles.label}>Amount:</label>
 		<input
@@ -127,7 +163,7 @@ const Chat = ({ initialChatLogs = [] }) => {
 		<button
 		type="button"
 		className={styles.paymentButton}
-		onClick={() => handlePayment("Credit Card")}
+		onClick={() => handlePayment(PaymentMethod.CREDIT)}
 		>
 		<img
 		src="https://stripe.com/img/v3/home/twitter.png"
@@ -139,7 +175,7 @@ const Chat = ({ initialChatLogs = [] }) => {
 		<button
 		type="button"
 		className={styles.paymentButton}
-		onClick={() => handlePayment("BTCPayServer")}
+		onClick={() => handlePayment(PaymentMethod.BTCPAY)}
 		>
 		<img
 		src={btc}
@@ -157,7 +193,7 @@ const Chat = ({ initialChatLogs = [] }) => {
 			<ul>
 			{chatLogs.map((log, index) => (
 				<li key={index}>
-				<strong>{log.name}:</strong> {log.message} (Amount: ${log.amount}, Payment Method: {log.paymentMethod})
+				<strong>{log.name}:</strong> {log.message} (Amount: ${log.amount} to {log.streamer}, Payment Method: {log.paymentMethod})
 				</li>
 			))}
 			</ul>
