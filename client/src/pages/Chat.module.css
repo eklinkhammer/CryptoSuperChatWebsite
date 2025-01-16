@@ -1,0 +1,112 @@
+/* Chat.module.css */
+
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form {
+  margin-bottom: 20px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.input {
+  height: 40px;
+}
+
+.textarea {
+  resize: none;
+  height: 80px;
+}
+
+.button {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+.chatLogs {
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+}
+
+.chatLogs ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.chatLogs li {
+  margin-bottom: 10px;
+}
+
+.chatLogs strong {
+  font-weight: bold;
+}
+
+.paymentButtons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.paymentButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.paymentButton:hover {
+  background-color: #0056b3;
+}
+
+.paymentIcon {
+  width: 24px;
+  height: 24px;
+}
