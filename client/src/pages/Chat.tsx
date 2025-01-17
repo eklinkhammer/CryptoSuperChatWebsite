@@ -63,6 +63,7 @@ const Chat = ({ initialChatLogs = [] }) => {
 		if (!formData.name.trim()) {
 			errors.name = "Name is required.";
 		}
+		// TODO - Replace validation with user prompt to confirm empty message
 		if (!formData.message.trim()) {
 			errors.message = "Message cannot be empty.";
 		}
@@ -75,7 +76,7 @@ const Chat = ({ initialChatLogs = [] }) => {
 	};
 
 	// Selection of payment (basically the submit)
-	const handlePayment = (paymentMethod: string) => {
+	const handlePayment = async (paymentMethod: string) => {
 
 		const validationErrors = validateInputs();
 		if (Object.keys(validationErrors).length > 0) {
@@ -87,122 +88,146 @@ const Chat = ({ initialChatLogs = [] }) => {
 		if (paymentMethod === PaymentMethod.CREDIT) {
 			alert("Processing payment via Credit Card...");
 		} else if (paymentMethod === PaymentMethod.BTCPAY) {
-			alert("Processing payment via BTCPayServer...");
-		}
-		formData.paymentMethod = paymentMethod;
-		formData.streamer = dropdownValue;
-		// Add the new message to the chat logs
-		setChatLogs([...chatLogs, formData]);
+			try {
+				const response = await fetch("/api/create-invoice", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						amount: formData.amount,
+						user: formData.name,
+						message: formData.message,
+						streamerId: streamerId,
+						streamer: dropdownValue
+					}),
+				});
 
-		// Reset the form
-		setFormData({
-			name: "",
-			message: "",
-			amount: "",
-			paymentMethod: "Credit Card", // Reset to default payment method
-			streamer: streamerId,
-		});
-		setDropdownValue(streamerId);
-	};
+				if (!response.ok) {
+					throw new Error("Failed to create invoice");
+				}
 
-	return (
-		<div className={styles.container}>
-		<h1 className={styles.heading}>Chat Page</h1>
-		<p> Giving money to {streamerId} </p>
-		<form className={styles.form}>
-		<div className={styles.formGroup}>
-		<label htmlFor="name" className={styles.label}>Name:</label>
-		<input
-		type="text"
-		id="name"
-		name="name"
-		value={formData.name}
-		onChange={handleChange}
-		className={styles.input}
-		required
-		/>
-		{errors.name && <p className={styles.error}>{errors.name}</p>}
-		</div>
+				const data = await response.json();
+				window.location.href = data.url;
+			} catch (error: any) {
+				// TODO - Some sort of visual indicator
+				console.error("Unable to do anything");
+			}
+	}
+	formData.paymentMethod = paymentMethod;
+	formData.streamer = dropdownValue;
+	// Add the new message to the chat logs
+	setChatLogs([...chatLogs, formData]);
 
-		<div className={styles.formGroup}>
-		<label htmlFor="message" className={styles.label}>Message:</label>
-		<textarea
-		id="message"
-		name="message"
-		value={formData.message}
-		onChange={handleChange}
-		className={styles.textarea}
-		required
-		/>
-		{errors.message && <p className={styles.error}>{errors.message}</p>}
-		</div>
+	// Reset the form
+	setFormData({
+		name: "",
+		message: "",
+		amount: "",
+		paymentMethod: "Credit Card", // Reset to default payment method
+		streamer: streamerId,
+	});
+	setDropdownValue(streamerId);
+};
 
-		<Dropdown
-			options={streamers}
-			value={dropdownValue}
-			onChange={handleDropdownChange}
-			label="Choose a streamer:"
-			id="dropdown"
-		/>
+return (
+	<div className={styles.container}>
+	<h1 className={styles.heading}>Chat Page</h1>
+	<p> Giving money to {streamerId} </p>
+	<form className={styles.form}>
+	<div className={styles.formGroup}>
+	<label htmlFor="name" className={styles.label}>Name:</label>
+	<input
+	type="text"
+	id="name"
+	name="name"
+	value={formData.name}
+	onChange={handleChange}
+	className={styles.input}
+	required
+	/>
+	{errors.name && <p className={styles.error}>{errors.name}</p>}
+	</div>
 
-		<div className={styles.formGroup}>
-		<label htmlFor="amount" className={styles.label}>Amount:</label>
-		<input
-		type="number"
-		id="amount"
-		name="amount"
-		value={formData.amount}
-		onChange={handleChange}
-		className={styles.input}
-		required
-		/>
-		{errors.amount && <p className={styles.error}>{errors.amount}</p>}
-		</div>
+	<div className={styles.formGroup}>
+	<label htmlFor="message" className={styles.label}>Message:</label>
+	<textarea
+	id="message"
+	name="message"
+	value={formData.message}
+	onChange={handleChange}
+	className={styles.textarea}
+	required
+	/>
+	{errors.message && <p className={styles.error}>{errors.message}</p>}
+	</div>
 
-		<div className={styles.paymentButtons}>
-		<button
-		type="button"
-		className={styles.paymentButton}
-		onClick={() => handlePayment(PaymentMethod.CREDIT)}
-		>
-		<img
-		src="https://stripe.com/img/v3/home/twitter.png"
-		alt="Credit Card"
-		className={styles.paymentIcon}
-		/>
-		<span>Pay with Credit Card</span>
-		</button>
-		<button
-		type="button"
-		className={styles.paymentButton}
-		onClick={() => handlePayment(PaymentMethod.BTCPAY)}
-		>
-		<img
-		src={btc}
-		alt="BTCPayServer"
-		className={styles.paymentIcon}
-		/>
-		<span>Pay with BTCPayServer</span>
-		</button>
-		</div>
-		</form>
+	<Dropdown
+	options={streamers}
+	value={dropdownValue}
+	onChange={handleDropdownChange}
+	label="Choose a streamer:"
+	id="dropdown"
+	/>
 
-		<div className={styles.chatLogs}>
-		<h2>Chat Logs:</h2>
-		{chatLogs.length > 0 ? (
-			<ul>
-			{chatLogs.map((log, index) => (
-				<li key={index}>
-				<strong>{log.name}:</strong> {log.message} (Amount: ${log.amount} to {log.streamer}, Payment Method: {log.paymentMethod})
-				</li>
-			))}
-			</ul>
-		) : (
-		<p>No messages yet.</p>
-		)}
-		</div>
-		</div>
-	);
+	<div className={styles.formGroup}>
+	<label htmlFor="amount" className={styles.label}>Amount:</label>
+	<input
+	type="number"
+	id="amount"
+	name="amount"
+	value={formData.amount}
+	onChange={handleChange}
+	className={styles.input}
+	required
+	/>
+	{errors.amount && <p className={styles.error}>{errors.amount}</p>}
+	</div>
+
+	<div className={styles.paymentButtons}>
+	<button
+	type="button"
+	className={styles.paymentButton}
+	onClick={() => handlePayment(PaymentMethod.CREDIT)}
+	>
+	<img
+	src="https://stripe.com/img/v3/home/twitter.png"
+	alt="Credit Card"
+	className={styles.paymentIcon}
+	/>
+	<span>Pay with Credit Card</span>
+	</button>
+	<button
+	type="button"
+	className={styles.paymentButton}
+	onClick={() => handlePayment(PaymentMethod.BTCPAY)}
+	>
+	<img
+	src={btc}
+	alt="BTCPayServer"
+	className={styles.paymentIcon}
+	/>
+	<span>Pay with BTCPayServer</span>
+	</button>
+	</div>
+	</form>
+
+	<div className={styles.chatLogs}>
+	<h2>Chat Logs:</h2>
+	{chatLogs.length > 0 ? (
+		<ul>
+		{chatLogs.map((log, index) => (
+			<li key={index}>
+			<strong>{log.name}:</strong> {log.message} (Amount: ${log.amount} to {log.streamer}, Payment Method: {log.paymentMethod})
+			</li>
+		))}
+		</ul>
+	) : (
+	<p>No messages yet.</p>
+	)}
+	</div>
+	</div>
+);
 };
 
 Chat.propTypes = {
