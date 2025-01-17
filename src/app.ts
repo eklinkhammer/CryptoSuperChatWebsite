@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const app: Application = express(); // Properly declare `app`
 
+const HOST = '0.0.0.0';
 const PORT = 5123;
 
 //interface ServerConfig {
@@ -111,7 +112,7 @@ app.get('*', (req: Request, res: Response) => {
 
 
 // Start the server
-app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+	console.log(`Server is running on http://${HOST}:${PORT}`);
 });
 
